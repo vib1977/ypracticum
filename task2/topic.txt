@@ -1,0 +1,11 @@
+Создание топика:
+sudo docker exec -it broker-1 kafka-topics --create --topic topic-tst-1 --bootstrap-server broker-1:29092 --partitions 3 --replication-factor 2
+
+Команда для вывода информации о топике:
+sudo docker exec -it broker-1 kafka-topics --describe --topic topic-tst-1 --bootstrap-server broker-1:29092
+
+Реультат команды:
+Topic: topic-tst-1	TopicId: VFLberQxRh-rXmp4OSyFVA	PartitionCount: 3	ReplicationFactor: 2	Configs: 
+	Topic: topic-tst-1	Partition: 0	Leader: 2	Replicas: 2,3	Isr: 2,3
+	Topic: topic-tst-1	Partition: 1	Leader: 3	Replicas: 3,1	Isr: 3,1
+	Topic: topic-tst-1	Partition: 2	Leader: 1	Replicas: 1,2	Isr: 1,2

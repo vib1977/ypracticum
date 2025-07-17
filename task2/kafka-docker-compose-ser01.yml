@@ -1,0 +1,102 @@
+version: '3'
+services:
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.0.1
+    environment:
+      # Порт 2181 ― стандартный для Zookeeper. Он используется для взаимодействия с приложениями, которые требуют доступа к Zookeeper    
+      ZOOKEEPER_CLIENT_PORT: 2181
+      # Определяет базовый временной интервал (в миллисекундах) для управления сессиями. Это время используется для тайм-аутов и периодов обновления
+      ZOOKEEPER_TICK_TIME: 2000
+    ports:
+      - 2181:2181
+    networks:
+      - kafka-network
+
+  broker-1:
+    image: confluentinc/cp-kafka:7.0.1
+    #hostname: broker-1
+    container_name: broker-1
+    depends_on:
+      - zookeeper
+    environment:
+      # это уникальный идентификатор для брокера в кластере Kafka. Каждый брокер имеет уникальный ID, чтобы другие брокеры и клиенты отличали его от других
+      KAFKA_BROKER_ID: 1
+      # указывает адрес и порт Zookeeper, к которому брокер Kafka должен подключаться, чтобы получить информацию о состоянии кластера и управлять им
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      # ToDo
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INTERNAL:PLAINTEXT,EXTERNAL:PLAINTEXT
+      # 
+      KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
+      # определяет, как брокер будет сообщать другим компонентам (например, клиентам), как подключаться к нему
+      KAFKA_ADVERTISED_LISTENERS: INTERNAL://broker-1:29092,EXTERNAL://localhost:9092
+      # указывает количество реплик для топика смещений (__consumer_offsets), которая хранит информацию о смещениях потребителей. Значение 1 означает, что не будет резервных копий смещения.
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+    ports:
+      - 9092:9092
+    networks:
+      - kafka-network
+
+  broker-2:
+    image: confluentinc/cp-kafka:7.0.1
+    container_name: broker-2
+    depends_on:
+      - zookeeper
+    environment:
+      # это уникальный идентификатор для брокера в кластере Kafka. Каждый брокер имеет уникальный ID, чтобы другие брокеры и клиенты отличали его от других
+      KAFKA_BROKER_ID: 2
+      # указывает адрес и порт Zookeeper, к которому брокер Kafka должен подключаться, чтобы получить информацию о состоянии кластера и управлять им
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      # ToDo
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INTERNAL:PLAINTEXT,EXTERNAL:PLAINTEXT
+      # 
+      KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
+      # определяет, как брокер будет сообщать другим компонентам (например, клиентам), как подключаться к нему
+      KAFKA_ADVERTISED_LISTENERS: INTERNAL://broker-2:29093,EXTERNAL://localhost:9093
+      # указывает количество реплик для топика смещений (__consumer_offsets), которая хранит информацию о смещениях потребителей. Значение 1 означает, что не будет резервных копий смещения.
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+    ports:
+      - 9093:9093
+    networks:
+      - kafka-network
+
+  broker-3:
+    image: confluentinc/cp-kafka:7.0.1
+    container_name: broker-3
+    depends_on:
+      - zookeeper
+    environment:
+      # это уникальный идентификатор для брокера в кластере Kafka. Каждый брокер имеет уникальный ID, чтобы другие брокеры и клиенты отличали его от других
+      KAFKA_BROKER_ID: 3
+      # указывает адрес и порт Zookeeper, к которому брокер Kafka должен подключаться, чтобы получить информацию о состоянии кластера и управлять им
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      # ToDo
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INTERNAL:PLAINTEXT,EXTERNAL:PLAINTEXT
+      # 
+      KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL      
+      # определяет, как брокер будет сообщать другим компонентам (например, клиентам), как подключаться к нему
+      KAFKA_ADVERTISED_LISTENERS: INTERNAL://broker-3:29094,EXTERNAL://localhost:9094
+      # указывает количество реплик для топика смещений (__consumer_offsets), которая хранит информацию о смещениях потребителей. Значение 1 означает, что не будет резервных копий смещения.
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+    ports:
+      - 9094:9094         
+    networks:
+      - kafka-network
+
+  kafka-ui:
+    image: provectuslabs/kafka-ui:v0.7.0
+    container_name: kafka-ui # add
+    ports:
+      - 8080:8080
+#    depends_on:
+#      - broker-1
+#      - broker-2
+#      - broker-3
+    environment:
+      - KAFKA_CLUSTERS_0_BOOTSTRAP_SERVERS=broker-1:29092,broker-2:29093,broker-3:29094
+      - KAFKA_CLUSTERS_0_NAME=kafka   
+    networks:
+      - kafka-network
+
+networks:
+  kafka-network:
+    driver: bridge 
